@@ -208,6 +208,46 @@ class PaiEasChatEndpoint(BaseChatModel):
 
         return generated_text
 
+        return ChatResult(generations=[generation])
+
+    def _call(
+        self,
+        messages: List[BaseMessage],
+        stop: Optional[List[str]] = None,
+        run_manager: Optional[CallbackManagerForLLMRun] = None,
+        **kwargs: Any,
+    ) -> str:
+        params = self._invocation_params(stop, **kwargs)
+
+        request_payload = self.format_request_payload(messages, **params)
+        response_payload = self._call_eas(request_payload)
+        generated_text = self._format_response_payload(response_payload, params["stop"])
+
+        if run_manager:
+            run_manager.on_llm_new_token(generated_text)
+
+        return generated_text
+
+        return ChatResult(generations=[generation])
+
+    def _call(
+        self,
+        messages: List[BaseMessage],
+        stop: Optional[List[str]] = None,
+        run_manager: Optional[CallbackManagerForLLMRun] = None,
+        **kwargs: Any,
+    ) -> str:
+        params = self._invocation_params(stop, **kwargs)
+
+        request_payload = self.format_request_payload(messages, **params)
+        response_payload = self._call_eas(request_payload)
+        generated_text = self._format_response_payload(response_payload, params["stop"])
+
+        if run_manager:
+            run_manager.on_llm_new_token(generated_text)
+
+        return generated_text
+
     def _call_eas(self, query_body: dict) -> Any:
         """Generate text from the eas service."""
         headers = {
@@ -227,7 +267,9 @@ class PaiEasChatEndpoint(BaseChatModel):
                 f" and message {response.text}"
             )
 
-        return response.text
+        return response.content
+
+
 
     def _call_eas_stream(self, query_body: dict) -> Any:
         """Generate text from the eas service."""
